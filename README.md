@@ -7,7 +7,7 @@ This is a plugin for pyenv to install the latest version of python.
 To install, clone into the pyenv plugins folder.
 
 ```
-git clone https://github.com/killjoy1221/pyenv-install-latest $PYENV_ROOT/plugin/pyenv-install-latest
+git clone https://github.com/killjoy1221/pyenv-install-latest $PYENV_ROOT/plugins/pyenv-install-latest
 ```
 
 ## Commands
