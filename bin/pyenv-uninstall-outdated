@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+# Summary: Uninstall outdated python versions
+#
+# Usage: pyenv uninstall-outdated
+#
+# Description:
+#   This command will uninstall outdated python versions. Only the latest
+#   installed version of each release will be kept.
+
+set -e
+[ -n "$PYENV_DEBUG" ] && set -x
+
+if [ "$#" -gt 1 ]; then
+	pyenv-help --usage uninstall-outdated >&2
+	exit 1
+fi
+
+installed_versions=$(pyenv-versions --bare | sort -Vr)
+
+# associative array to keep track of handled versions
+declare -A minor_versions
+
+for ver in $installed_versions; do
+    minor_ver=$(cut -d. -f1-2 <<< "$ver")
+    if [ -n "${minor_versions["$minor_ver"]}" ]; then
+        pyenv-uninstall -f "$ver"
+    fi
+    minor_versions["$minor_ver"]=1
+done

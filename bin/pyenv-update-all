@@ -1,0 +1,44 @@
+#!/bin/bash
+# Summary: Update all python versions
+#
+# Usage: pyenv update-all
+#
+# Description:
+#   This command will install the latest version of every python release
+#   currently installed
+
+set -e
+[ -n "$PYENV_DEBUG" ] && set -x
+
+if [ "$#" -gt 0 ]; then
+	pyenv-help --usage update-all >&2
+	exit 1
+fi
+
+installed_versions=$(pyenv-versions --bare | sort -Vr)
+target_versions=$(echo "$installed_versions" | cut -d. -f1-2 | uniq)
+
+# array containing the latest version of each release
+latest_versions=()
+
+for ver in $target_versions; do
+    latest_ver=$(latest-python "^$ver")
+    latest_versions+=("$latest_ver")
+
+    pyenv-install "$latest_ver" -s
+done
+
+# check for outdated versions
+outdated_versions=$(xargs -n 1 <<< "$installed_versions")
+for vers in "${latest_versions[@]}"; do
+    outdated_versions=$(grep -v "$vers" <<< "$outdated_versions")
+done
+
+# display the outdated versions
+if [ -n "$outdated_versions" ]; then
+    echo "Outdated versions installed!"
+    echo
+    echo "$outdated_versions" | awk '{ print " " $0 }'
+    echo
+    echo "Run pyenv uninstall-outdated to uninstall them"
+fi

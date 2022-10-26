@@ -1,0 +1,54 @@
+#!/bin/bash
+# Summary: Install the latest version of a python release
+#
+# Usage: pyenv install-latest [version]
+#
+# Description:
+#   This command will pick the latest version as returned from pyenv version --list.
+#   If an argument is provided, it will be used as a filter.
+#
+# Arguments:
+#  	version - the minor version to install. If not provided, will use the latest version
+#
+# Examples:
+#   pyenv install-latest
+#   pyenv install-latest 3.11
+#   pyenv install-latest 2.7
+#   pyenv install-latest anaconda3
+
+set -e
+[ -n "$PYENV_DEBUG" ] && set -x
+
+if [ "$#" -gt 1 ]; then
+	pyenv-help --usage install-latest >&2
+	exit 1
+fi
+
+quote() {
+	python -c 'import re;print(re.escape(input()))' <<< "$1"
+}
+
+pyresolve() {
+	local quoted resolved
+	quoted=$(quote "$1")
+	resolved=$(latest-python "^${quoted}[.$-]")
+	if [ -z "$resolved" ]; then
+		echo "Could not resolve '$1' to a python version" >&2
+		return 2
+	fi
+	echo "$resolved"
+}
+
+version=$1
+
+if [ -z "$version" ]; then
+	resolved=$(latest-python)
+else
+	resolved=$(pyresolve "$version")
+fi
+
+echo -n "Install python $resolved? (y/N) "
+read -r choice
+if [ "$choice" = "y" ]; then
+	pyenv-install "$resolved"
+fi

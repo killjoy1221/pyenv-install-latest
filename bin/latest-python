@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+pattern=$1
+if [ -z "$pattern" ]; then
+    pattern='^\d+\.\d+\.\d+(?!b\d+)$'
+fi
+pyenv-install --list | tail -n +2 | xargs -n 1 | grep -P "$pattern" | sort -V | tail -n 1
